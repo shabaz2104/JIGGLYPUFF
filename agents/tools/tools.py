@@ -1,39 +1,47 @@
 import requests
-import os
 
-BASE_URL = "http://localhost:5000"  # change if backend runs on different port
-
-def check_stock(medicine_name: str, quantity: int):
-    
-    # MOCK RESPONSE (temporary)
-    return {
-        "status": "approved",
-        "medicine_name": medicine_name,
-        "available_quantity": 10,
-        "requested_quantity": quantity
-    }
-
-    return response.json()
+BASE_URL = "http://127.0.0.1:5000"
 
 
-def create_order(order_data: dict):
-    
-    return {
-        "status": "success",
-        "order_id": "ORD123",
-        "message": "Order created successfully"
-    }
+def check_inventory(medicine_name: str):
+    try:
+        response = requests.get(
+            f"{BASE_URL}/inventory/{medicine_name}"
+        )
+        return response.json()
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e)
+        }
 
 
-    return response.json()
+def create_order(customer_id: str, medicine_name: str, quantity: int):
+    try:
+        response = requests.post(
+            f"{BASE_URL}/create-order",
+            json={
+                "customer_id": customer_id,
+                "medicine": medicine_name,
+                "quantity": quantity
+            }
+        )
+        return response.json()
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e)
+        }
 
 
-def get_customer_history(customer_id: int):
-    """
-    Fetch customer purchase history.
-    """
-    response = requests.get(
-        f"{BASE_URL}/customer-history/{customer_id}"
-    )
-
-    return response.json()
+def get_customer_history(customer_id: str):
+    try:
+        response = requests.get(
+            f"{BASE_URL}/customer-history/{customer_id}"
+        )
+        return response.json()
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e)
+        }
