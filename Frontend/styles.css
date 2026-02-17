@@ -1,0 +1,112 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: #eef2f7;
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* LEFT CHAT */
+.chat-panel {
+    flex: 1;
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    color: white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header h2 {
+    margin: 0;
+}
+
+.chat-box {
+    flex: 1;
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 15px;
+    margin: 20px 0;
+    overflow-y: auto;
+}
+
+.input-area {
+    display: flex;
+    align-items: center;
+}
+
+input {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    margin: 0 10px;
+}
+
+.voice-btn {
+    background: white;
+    border: none;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    cursor: pointer;
+}
+
+.send-btn {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* RIGHT ADMIN */
+.admin-panel {
+    flex: 1;
+    background: #f8fafc;
+    padding: 20px;
+}
+
+.admin-panel h2 {
+    margin-top: 0;
+}
+
+.card {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.alert-red {
+    color: red;
+}
+
+.alert-orange {
+    color: orange;
+}
+
+.green {
+    color: green;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .container {
+        flex-direction: column;
+    }
+}
