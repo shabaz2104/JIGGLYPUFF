@@ -1,86 +1,108 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Medication Order Assistant</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APS - Smart Pharmacy System</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="container">
+<nav>
+  <div class="logo">APS</div>
+  <ul>
+    <li onclick="show('home')">Home</li>
+    <li onclick="show('main')">Dashboard</li>
+    <li onclick="show('admin')">Admin</li>
+    <li onclick="show('about')">About</li>
+  </ul>
+</nav>
 
-    <!-- LEFT CHAT -->
-    <div class="chat-panel">
+<!-- HOME -->
+<section id="home" class="page active">
+  <div class="hero">
+    <div class="curve"></div>
+    <h1>Smart Pharmacy System</h1>
+    <p>AI Assistant + Advanced Admin Dashboard</p>
+    <button onclick="show('main')">Get Started</button>
+  </div>
+</section>
 
-        <div class="chat-header">
-            <h2>Medication Order Assistant</h2>
-            <p>Voice & Text Assistant</p>
-        </div>
+<!-- MAIN -->
+<section id="main" class="page">
+  <div class="container">
 
-        <div id="chatBox" class="chat-box"></div>
-
-        <div class="input-area">
-            <button class="voice-btn" onclick="startVoice()">🎤</button>
-            <input type="text" id="userInput" placeholder="Speak or type your request...">
-            <button class="send-btn" onclick="sendMessage()">Send</button>
-        </div>
-
+    <div class="assistant">
+      <h2>AI Assistant</h2>
+      <div class="chatbox">
+        <div class="msg bot">Hello 👋 How can I help you?</div>
+      </div>
+      <input placeholder="Ask something...">
     </div>
 
-    <!-- RIGHT ADMIN -->
-    <div class="admin-panel">
+    <div class="dashboard">
+      <h2>Admin Dashboard</h2>
 
-        <h2>Admin Dashboard</h2>
+      <div class="cards">
+        <div class="card">Revenue <h3>$125K</h3></div>
+        <div class="card">Profit <h3>$18K</h3></div>
+        <div class="card">Cost <h3>$56K</h3></div>
+      </div>
 
-        <div class="card">
-            <h3>Current Stock</h3>
-            <p>Paracetamol 650: <b>32</b></p>
+      <div class="chart">
+        <h3>Sales Overview</h3>
+        <div class="bars">
+          <div class="bar" style="height:70%"></div>
+          <div class="bar" style="height:90%"></div>
+          <div class="bar" style="height:60%"></div>
+          <div class="bar" style="height:85%"></div>
+          <div class="bar" style="height:75%"></div>
         </div>
-
-        <div class="card">
-            <h3>Low Stock Alerts</h3>
-            <p class="alert-red">Ibuprofen: Low Stock</p>
-            <p class="alert-orange">Amoxicillin: Refill Needed</p>
-        </div>
-
-        <div class="card">
-            <h3>Recent Orders</h3>
-            <p>Order #1023 - Paracetamol 650 (10 tablets)</p>
-            <p>Order #1022 - Cetirizine (5 tablets)</p>
-        </div>
-
-        <div class="card">
-            <h3>Inventory Overview</h3>
-            <table>
-                <tr>
-                    <th>Medicine</th>
-                    <th>Stock</th>
-                    <th>Status</th>
-                </tr>
-                <tr>
-                    <td>Paracetamol 650</td>
-                    <td>32</td>
-                    <td class="green">In Stock</td>
-                </tr>
-                <tr>
-                    <td>Ibuprofen</td>
-                    <td>5</td>
-                    <td class="alert-red">Low Stock</td>
-                </tr>
-                <tr>
-                    <td>Amoxicillin</td>
-                    <td>2</td>
-                    <td class="alert-orange">Refill Needed</td>
-                </tr>
-            </table>
-        </div>
-
+      </div>
     </div>
 
-</div>
+  </div>
+</section>
 
-<script src="../JS/chat.js"></script>
-<script src="../JS/vapi.js"></script>
+<!-- ADMIN -->
+<section id="admin" class="page">
+  <h1 class="center">Admin Panel</h1>
 
+  <div class="cards">
+    <div class="card">Total Revenue <h3>$225K</h3></div>
+    <div class="card">Gross Revenue <h3>$265K</h3></div>
+    <div class="card">Total Cost <h3>$120K</h3></div>
+    <div class="card">Total Profit <h3>$45K</h3></div>
+  </div>
+
+  <div class="chart big">
+    <h3>Sales Overview</h3>
+    <div class="bars">
+      <div class="bar" style="height:75%"></div>
+      <div class="bar" style="height:95%"></div>
+      <div class="bar" style="height:65%"></div>
+      <div class="bar" style="height:90%"></div>
+      <div class="bar" style="height:80%"></div>
+      <div class="bar" style="height:70%"></div>
+      <div class="bar" style="height:85%"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="page">
+  <div class="about">
+    <h1>About Us</h1>
+    <p>
+      We are a passionate team dedicated to building smart, innovative, and user-friendly digital solutions for modern healthcare and pharmacy management. Our mission is to simplify complex processes, enhance efficiency, and provide seamless experiences through cutting-edge technology.
+      <br><br>
+      By combining intuitive design with powerful backend systems, we aim to transform traditional pharmacy operations into a fully digital, fast, and reliable ecosystem. Our platform enables real-time inventory tracking, automated order management, sales analytics, and secure data handling.
+      <br><br>
+      Our goal is to empower pharmacies with digital tools that increase productivity, reduce manual workload, minimize errors, and improve customer satisfaction. With reliability, innovation, and quality, we deliver excellence at every step.
+    </p>
+  </div>
+</section>
+
+<script src="script.js"></script>
 </body>
 </html>
