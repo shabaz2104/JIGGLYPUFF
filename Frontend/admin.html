@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>APS Admin Panel</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="admin-body">
+
+<div class="admin-layout">
+
+  <aside class="sidebar">
+    <h2>APS</h2>
+    <ul>
+      <li class="active">Overview</li>
+      <li>Products</li>
+      <li>Orders</li>
+      <li>Sales</li>
+      <li>Customers</li>
+      <li>Payments</li>
+      <li>Settings</li>
+    </ul>
+  </aside>
+
+  <main class="admin-main">
+
+    <h2>Sales Overview</h2>
+
+    <div class="cards">
+      <div class="card dark">Total Revenue<br><b>$112,200</b></div>
+      <div class="card">Total Profit<br><b>$12,500</b></div>
+      <div class="card">Total Cost<br><b>$48,200</b></div>
+      <div class="card">Avg Order<br><b>$96.50</b></div>
+    </div>
+
+    <div class="admin-grid">
+
+      <div class="graph big">
+        <h3>Total Revenue</h3>
+        <div class="bars">
+          <div class="bar" style="height:70%"></div>
+          <div class="bar" style="height:90%"></div>
+          <div class="bar" style="height:60%"></div>
+          <div class="bar" style="height:85%"></div>
+          <div class="bar" style="height:75%"></div>
+          <div class="bar" style="height:80%"></div>
+        </div>
+      </div>
+
+      <div class="orders">
+        <h3>Recent Orders</h3>
+        <table>
+          <tr><th>ID</th><th>Medicine</th><th>Status</th></tr>
+          <tr><td>#ORD576</td><td>Paracetamol</td><td>Paid</td></tr>
+          <tr><td>#ORD575</td><td>Amoxicillin</td><td>Pending</td></tr>
+          <tr><td>#ORD574</td><td>Cetirizine</td><td>Completed</td></tr>
+        </table>
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+</body>
+</html>
