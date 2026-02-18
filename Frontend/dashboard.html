@@ -9,33 +9,54 @@
 
 <div class="split">
 
+  <!-- AI ASSISTANT -->
   <div class="assistant">
-    <h2>AI Assistant</h2>
-    <div class="chat">
-      <div class="msg bot">Hello 👋 How can I help you?</div>
+    <h2>AI Medication Assistant</h2>
+    <div class="chatbox">
+      <div class="msg bot">Hello 👋 I can help you with medicines, orders & stock.</div>
+      <div class="msg user">I need paracetamol 650 twice a day.</div>
+      <div class="msg bot">Got it! Preparing 10 tablets. Order approved.</div>
     </div>
-    <input placeholder="Type your query...">
+    <input placeholder="Type your request...">
   </div>
 
-  <div class="blue-dashboard">
+  <!-- MEDICATION ADMIN DASHBOARD -->
+  <div class="med-dashboard">
+
     <h2>Admin Dashboard</h2>
 
     <div class="cards">
-      <div class="card dark">Total Revenue<br><b>$112,200</b></div>
-      <div class="card">Total Profit<br><b>$12,500</b></div>
-      <div class="card">Total Cost<br><b>$48,200</b></div>
-      <div class="card">Avg Order<br><b>$96.50</b></div>
+      <div class="card dark">Current Stock<br><b>Paracetamol 650 : 32</b></div>
+      <div class="card alert">Low Stock<br><b>Ibuprofen</b></div>
+      <div class="card warn">Refill Needed<br><b>Amoxicillin</b></div>
     </div>
 
-    <div class="graph">
-      <h3>Total Revenue</h3>
-      <div class="bars">
-        <div class="bar" style="height:70%"></div>
-        <div class="bar" style="height:85%"></div>
-        <div class="bar" style="height:60%"></div>
-        <div class="bar" style="height:90%"></div>
-        <div class="bar" style="height:75%"></div>
-      </div>
+    <div class="section">
+      <h3>Recent Orders</h3>
+      <table>
+        <tr><th>Order ID</th><th>Medicine</th><th>Qty</th></tr>
+        <tr><td>#1023</td><td>Paracetamol 650</td><td>10</td></tr>
+        <tr><td>#1022</td><td>Cetirizine</td><td>5</td></tr>
+      </table>
+    </div>
+
+    <div class="section">
+      <h3>Inventory Overview</h3>
+      <table>
+        <tr><th>Medicine</th><th>Stock</th><th>Status</th></tr>
+        <tr><td>Paracetamol 650</td><td>32</td><td class="ok">In Stock</td></tr>
+        <tr><td>Ibuprofen</td><td>5</td><td class="low">Low</td></tr>
+        <tr><td>Amoxicillin</td><td>2</td><td class="refill">Refill</td></tr>
+      </table>
+    </div>
+
+    <div class="section">
+      <h3>Pending Refill Requests</h3>
+      <table>
+        <tr><th>Req ID</th><th>Medicine</th><th>Qty</th><th>Status</th></tr>
+        <tr><td>REQ-110</td><td>Ibuprofen</td><td>20</td><td class="pending">Pending</td></tr>
+        <tr><td>REQ-109</td><td>Amoxicillin</td><td>30</td><td class="pending">Pending</td></tr>
+      </table>
     </div>
 
   </div>
