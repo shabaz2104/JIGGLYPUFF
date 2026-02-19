@@ -1,36 +1,81 @@
-from agents.models.schemas import MedicineOrder
 from agents.tools.tools import (
     check_inventory,
     create_order,
-    get_customer_history
+    get_customer_history,
+    update_stock
 )
 
 
-def process_order(order: MedicineOrder):
+def handle_intent(request):
 
-    # Step 1 — Check inventory
-    inventory_response = check_inventory(order.medicine_name)
+    intent = request.intent
 
-    if inventory_response.get("status") != "available":
-        return {
-            "status": "rejected",
-            "reason": "Medicine not available"
-        }
+    # =========================
+    # ORDER
+    # =========================
+    if intent == "order":
 
-    # Step 2 — Create order
-    order_response = create_order(
-        customer_id="PAT001",  # For now fixed (we improve later)
-        medicine_name=order.medicine_name,
-        quantity=order.quantity
-    )
+        if not request.medicine_name or not request.quantity:
+            return {
+                "status": "error",
+                "reason": "missing_fields"
+            }
 
-    if order_response.get("status") != "created":
+        inventory = check_inventory(request.medicine_name)
+
+        if inventory.get("status") != "available":
+            return {
+                "status": "rejected",
+                "reason": "medicine_not_found"
+            }
+
+        return create_order(
+            customer_id=request.customer_id or "PAT001",
+            medicine=request.medicine_name,
+            quantity=request.quantity
+        )
+
+    # =========================
+    # INVENTORY
+    # =========================
+    elif intent == "inventory":
+
+        if not request.medicine_name:
+            return {
+                "status": "error",
+                "reason": "missing_medicine_name"
+            }
+
+        return check_inventory(request.medicine_name)
+
+    # =========================
+    # HISTORY
+    # =========================
+    elif intent == "history":
+
+        return get_customer_history(request.customer_id or "PAT001")
+
+    # =========================
+    # UPDATE STOCK
+    # =========================
+    elif intent == "update_stock":
+
+        if not request.medicine_name or request.stock is None:
+            return {
+                "status": "error",
+                "reason": "missing_fields"
+            }
+
+        return update_stock(
+            request.medicine_name,
+            request.stock
+        )
+
+    # =========================
+    # UNKNOWN
+    # =========================
+    else:
         return {
             "status": "error",
-            "reason": "Order creation failed"
+            "reason": "unknown_intent"
         }
-
-    return {
-        "status": "success",
-        "order_id": order_response.get("order_id")
-    }

@@ -1,6 +1,15 @@
 from agents.core.agent_runner import run_agent
 
 if __name__ == "__main__":
-    user_input = "I want 2 strips of Crocin 650mg"
-    result = run_agent(user_input)
-    print(result)
+    test_cases = [
+        "Order 2 Paracetamol",
+        "Is Paracetamol available?",
+        "Show my previous orders",
+        "Update stock of Paracetamol to 50"
+    ]
+
+    for case in test_cases:
+        print("INPUT:", case)
+        result = run_agent(case)
+        print("OUTPUT:", result)
+        print("-" * 50)

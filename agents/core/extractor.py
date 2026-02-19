@@ -1,54 +1,62 @@
 import os
 import json
-from openai import AzureOpenAI
 from dotenv import load_dotenv
+from openai import AzureOpenAI
 from agents.models.schemas import MedicineOrder
 
-# Load .env from project root
 load_dotenv()
 
-# Initialize Azure client
 client = AzureOpenAI(
+    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
     api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
     azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
 )
 
 
-def extract_order(user_message: str) -> MedicineOrder:
-    system_prompt = """
-You are a strict medical order extraction engine.
+def extract_structured_data(user_input: str):
 
-Convert user message into JSON matching this schema:
+    system_prompt = """
+You are a structured data extraction system for a pharmacy AI.
+
+Your job is to classify the intent and extract relevant data.
+
+Possible intents:
+- order
+- inventory
+- history
+- update_stock
+
+Return ONLY valid JSON in this format:
 
 {
-  "intent": "order | availability_check | refill | general_query",
-  "medicine_name": "string",
-  "dosage": "string or null",
-  "quantity": integer
+  "intent": "one_of_the_above",
+  "medicine_name": string or null,
+  "quantity": integer or null,
+  "stock": integer or null,
+  "customer_id": string or null
 }
 
 Rules:
-- Return ONLY valid JSON.
-- No explanations.
-- No extra text.
-- If missing dosage, set null.
-- If quantity not specified, default to 1.
+- Do NOT include explanations.
+- Do NOT include markdown.
+- Return JSON only.
 """
 
-    response = client.chat.completions.create(
-        model=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_message}
-        ],
-        temperature=0,
-    )
-
-    raw_output = response.choices[0].message.content
-
     try:
+        response = client.chat.completions.create(
+            model=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_input}
+            ],
+            temperature=0
+        )
+
+        raw_output = response.choices[0].message.content.strip()
+
         parsed = json.loads(raw_output)
+
         return MedicineOrder(**parsed)
-    except Exception:
-        raise ValueError(f"Invalid model output: {raw_output}")
+
+    except Exception as e:
+        raise Exception(f"Extraction failed: {str(e)}")

@@ -1,17 +1,21 @@
-from agents.core.extractor import extract_order
-from agents.core.controller import process_order
+from agents.core.extractor import extract_structured_data
+from agents.core.controller import handle_intent
 from agents.core.responder import generate_response
 
 
 def run_agent(user_input: str):
     try:
-        # Step 1: Extract structured order using GPT
-        extracted_order = extract_order(user_input)
+        # STEP 1 — Extract structured data (intent + entities)
+        structured_data = extract_structured_data(user_input)
 
-        # Step 2: Process order using controller (tools)
-        tool_result = process_order(extracted_order)
+        # If extraction itself failed
+        if isinstance(structured_data, dict) and structured_data.get("status") == "error":
+            return structured_data
 
-        # Step 3: Generate final human-friendly response using GPT
+        # STEP 2 — Execute logic based on intent
+        tool_result = handle_intent(structured_data)
+
+        # STEP 3 — Generate final GPT response
         final_message = generate_response(user_input, tool_result)
 
         return {
