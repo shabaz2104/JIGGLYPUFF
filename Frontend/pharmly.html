@@ -2081,6 +2081,98 @@ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
 // Init dashboard on load
 initDashboard();
+
+/*************************************************
+ * BACKEND + AI AGENT ENDPOINT LAYER (ADD ONLY)
+ * Paste this at the TOP of your main <script> tag
+ *************************************************/
+
+// NOTE:
+// Ye assume karta hai ki tere existing code me:
+// inventory, orders, alerts arrays already defined hain.
+// Agar variable names different ho, bas yaha naam match kar dena.
+
+window.API = {
+
+  // ================= GET INVENTORY =================
+  getInventory: async () => {
+    return JSON.parse(JSON.stringify(inventory));
+  },
+
+  // ================= PLACE ORDER =================
+  placeOrder: async (order) => {
+    order.id = Date.now();
+    orders.push(order);
+
+    order.items.forEach(item => {
+      const product = inventory.find(p => p.id === item.id);
+      if (product) {
+        product.stock -= item.qty;
+
+        if (product.stock < 10) {
+          alerts.push({
+            id: Date.now(),
+            message: `${product.name} stock low`,
+            stock: product.stock
+          });
+        }
+      }
+    });
+
+    return {
+      success: true,
+      orderId: order.id,
+      message: "Order placed successfully"
+    };
+  },
+
+  // ================= UPDATE STOCK =================
+  updateStock: async (id, stock) => {
+    const product = inventory.find(p => p.id === id);
+    if (!product) {
+      return { success: false, message: "Item not found" };
+    }
+
+    product.stock = stock;
+    return { success: true, message: "Stock updated" };
+  },
+
+  // ================= GET ALERTS =================
+  getAlerts: async () => {
+    return alerts;
+  }
+
+};
+
+
+// ================= AI AGENT ENDPOINT =================
+
+window.AI_AGENT = async () => {
+
+  const lowStockItems = inventory.filter(i => i.stock < 10);
+
+  const salesMap = orders
+    .flatMap(o => o.items)
+    .reduce((acc, item) => {
+      acc[item.id] = (acc[item.id] || 0) + item.qty;
+      return acc;
+    }, {});
+
+  const fastMovingItems = Object.entries(salesMap)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+
+  return {
+    totalProducts: inventory.length,
+    totalOrders: orders.length,
+    lowStockItems,
+    fastMovingItems
+  };
+};
+
+/*************************************************
+ * END OF BACKEND + AI AGENT LAYER
+ *************************************************/
 </script>
 </body>
 </html>
