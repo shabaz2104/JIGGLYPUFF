@@ -1,26 +1,134 @@
-from agents.models.schemas import MedicineOrder
-from agents.tools.tools import check_stock, create_order
+# agents/core/controller.py
+
+from agents.tools.tools import (
+    check_inventory,
+    create_order,
+    update_stock,
+    get_customer_history
+)
+from agents.core.memory import save_last_medicine, get_last_medicine
+from agents.core.prescription_rules import requires_prescription
+from agents.tools.webhook import trigger_admin_alert
 
 
-def process_order(order: MedicineOrder):
+def handle_intent(request):
 
-    # Step 1 — Check stock
-    stock_response = check_stock(
-        order.medicine_name,
-        order.quantity
-    )
+    customer_id = request.customer_id or "PAT001"
 
-    # Step 2 — Decision logic
-    if stock_response["status"] != "approved":
-        return {
-            "status": "rejected",
-            "reason": "Medicine not available"
-        }
+    if request.intent == "order":
 
-    # Step 3 — Create order
-    order_response = create_order(order.dict())
+        # 🔥 Auto-fill from memory if medicine missing
+        if not request.medicine_name:
+            last_medicine = get_last_medicine(customer_id)
+            if last_medicine:
+                request.medicine_name = last_medicine
 
-    return {
-        "status": "success",
-        "order_details": order_response
-    }
+        # 🔒 Prescription Enforcement
+        if requires_prescription(request.medicine_name):
+
+            # 🚨 Webhook: Prescription blocked
+            trigger_admin_alert(
+                "prescription_blocked",
+                {
+                    "customer_id": customer_id,
+                    "medicine": request.medicine_name
+                }
+            )
+
+            return {
+                "status": "rejected",
+                "reason": "prescription_required"
+            }
+
+        inventory = check_inventory(request.medicine_name)
+
+        if inventory.get("status") != "ok":
+            return inventory
+
+        if not inventory.get("available"):
+
+            # 🚨 Webhook: Out of stock
+            trigger_admin_alert(
+                "out_of_stock",
+                {
+                    "medicine": request.medicine_name
+                }
+            )
+
+            return inventory
+
+        order = create_order(
+            customer_id,
+            request.medicine_name,
+            request.quantity
+        )
+
+        # 🚨 Webhook: Insufficient stock from backend
+        if order.get("status") == "rejected" and order.get("reason") == "insufficient_stock":
+            trigger_admin_alert(
+                "insufficient_stock_attempt",
+                {
+                    "medicine": request.medicine_name,
+                    "requested_quantity": request.quantity,
+                    "available_stock": order.get("available_stock")
+                }
+            )
+
+        if order.get("status") == "created":
+    
+            save_last_medicine(customer_id, request.medicine_name)
+
+            # 🚀 Webhook: Order Created (Full Payload for Google Sheet + Email)
+            trigger_admin_alert(
+                "order_created",
+                {
+                    "order_id": order.get("order_id"),
+                    "customer_id": customer_id,
+                    "customer_name": "Priyanshu",  # replace later with real DB value
+                    "medicine": order.get("medicine"),
+                    "quantity": order.get("quantity"),
+                    "date": order.get("date"),
+                    "total_price": order.get("total_price")
+                }
+            )
+
+            # 🚨 Webhook: Low stock warning (after order)
+            if inventory.get("stock") is not None and inventory.get("stock") <= 5:
+                trigger_admin_alert(
+                    "low_stock_warning",
+                    {
+                        "medicine": request.medicine_name,
+                        "remaining_stock": inventory.get("stock")
+                    }
+                )
+    elif request.intent == "inventory":
+        return check_inventory(request.medicine_name)
+
+
+    elif request.intent == "history":
+        return get_customer_history(customer_id)
+
+
+    elif request.intent == "update_stock":
+
+        update = update_stock(request.medicine_name, request.delta)
+
+        if update.get("status") == "updated":
+
+            # 🚨 Webhook: Stock manually updated
+            trigger_admin_alert(
+                "stock_updated",
+                {
+                    "medicine": update.get("medicine"),
+                    "new_stock": update.get("stock")
+                }
+            )
+
+        return update
+
+
+    elif request.intent == "smalltalk":
+        return {"status": "smalltalk"}
+
+
+    return {"status": "error", "reason": "unknown_intent"}
