@@ -1,0 +1,9 @@
+medicine,prescription_required,refill_days,low_stock_threshold,addictive_risk,max_monthly_quantity
+Paracetamol,False,7,5,low,10
+Ibuprofen,False,10,5,low,8
+Amoxicillin,True,14,3,medium,3
+Azithromycin,True,14,3,medium,3
+Codeine,True,14,3,high,2
+Diazepam,True,30,2,high,1
+Insulin,True,30,5,medium,5
+Crocin,False,7,5,low,10

@@ -1,53 +1,74 @@
-# Agentic AI Pharmacy System – Backend
+# Agentic AI Pharmacy Backend
 
-This repository contains the Flask backend for the Agentic AI Pharmacy System.
+This backend powers an **Agentic AI Pharmacy System**.
+It provides real-time inventory management, order creation,
+and stock control for AI agents and frontend dashboards.
+
+---
 
 ## Tech Stack
-- Python
-- Flask
-- SQLite
-- n8n (webhook integration)
+- Python (Flask)
+- SQLite (lightweight, persistent)
+- ngrok (secure public tunneling for demo)
+- REST APIs (JSON-first, agent-friendly)
 
-## Folder Structure
+---
 
-backend/
-- app.py → Flask entry point
-- routes/ → API endpoints
-- models/ → Database logic
-- database/ → SQLite setup
-- utils/ → Helpers (validation, webhooks)
-
-## How to Run (Development)
+## How to Run (Local)
 
 ```bash
 cd backend
 python app.py
+Backend runs on:
 
-API Design Rules
+http://127.0.0.1:5000
+Public Demo Access (ngrok)
+ngrok http 5000
 
-JSON in / JSON out
+Use the generated HTTPS URL as the Base URL for:
 
-No human-readable sentences
+AI Agent
 
-Agent-friendly responses only
+Frontend dashboard
 
-Status
+API Contract (FINAL)
+Health Check
+GET /health
+Inventory Lookup
+GET /inventory/<medicine>
+Create Order (reduces stock)
+POST /create-order
+{
+  "customer_id": "PAT001",
+  "medicine": "Paracetamol",
+  "quantity": 2
+}
+Update Stock (admin / agent)
+POST /update-stock
+{
+  "medicine": "Paracetamol",
+  "delta": 10
+}
+Customer Order History
+GET /customer-history/<customer_id>
+Backend Guarantees
 
-🚧 Under active development
+Stock never goes negative
 
+Orders are transactional
 
-🧠 This README is for:
-- Teammates
-- Judges
-- Your future self
+SQLite is source of truth
 
----
+APIs are deterministic & JSON-only
 
-## STEP 8️⃣ — COMMIT STRUCTURE (IMPORTANT)
+Designed for AI agent consumption
 
-From repo root:
+Notes for Hackathon Demo
 
-```bash
-git add .
-git commit -m "Day 1A: backend folder structure and README"
-git push
+Backend exposed securely via ngrok
+
+No hardcoded mock data
+
+Real inventory mutations
+
+Designed to scale to real DB easily
