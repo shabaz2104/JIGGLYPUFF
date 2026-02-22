@@ -1,4 +1,4 @@
- main
+
 import requests
 import os
 
@@ -101,4 +101,4 @@ def get_customer_history(customer_id):
         return r.json()
     except Exception as e:
         return {"status": "error", "reason": str(e)}
- main
+ 

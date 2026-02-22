@@ -1,31 +1,3 @@
- main
-from agents.models.schemas import MedicineOrder
-from agents.tools.tools import check_stock, create_order
-
-
-def process_order(order: MedicineOrder):
-
-    # Step 1 — Check stock
-    stock_response = check_stock(
-        order.medicine_name,
-        order.quantity
-    )
-
-    # Step 2 — Decision logic
-    if stock_response["status"] != "approved":
-        return {
-            "status": "rejected",
-            "reason": "Medicine not available"
-        }
-
-    # Step 3 — Create order
-    order_response = create_order(order.dict())
-
-    return {
-        "status": "success",
-        "order_details": order_response
-    }
-
 # agents/core/controller.py
 
 from agents.tools.tools import (
@@ -36,27 +8,37 @@ from agents.tools.tools import (
 )
 from agents.core.memory import save_last_medicine, get_last_medicine
 from agents.core.prescription_rules import requires_prescription
+from agents.core.prescription_memory import (
+    is_prescription_verified,
+    mark_prescription_verified
+)
 from agents.tools.webhook import trigger_admin_alert
 from agents.core.predictor import check_monthly_limit
-from agents.core.prescription_memory import is_prescription_verified  # ✅ ADDED
 
 
 def handle_intent(request):
 
     customer_id = request.customer_id or "PAT001"
 
+    # ==========================================================
+    # ORDER FLOW
+    # ==========================================================
     if request.intent == "order":
 
-        # 🔥 Auto-fill from memory if medicine missing
+        # Auto-fill medicine from memory
         if not request.medicine_name:
             last_medicine = get_last_medicine(customer_id)
             if last_medicine:
                 request.medicine_name = last_medicine
 
-        # 🔒 Prescription Enforcement (UPDATED LOGIC)
-        if requires_prescription(request.medicine_name) and not is_prescription_verified(customer_id, request.medicine_name):
+        # ------------------------------
+        # Prescription Enforcement
+        # ------------------------------
+        if (
+            requires_prescription(request.medicine_name)
+            and not is_prescription_verified(customer_id, request.medicine_name)
+        ):
 
-            # 🚨 Webhook: Prescription blocked
             trigger_admin_alert(
                 "prescription_blocked",
                 {
@@ -70,7 +52,9 @@ def handle_intent(request):
                 "reason": "prescription_required"
             }
 
-        # 🔒 Monthly Limit Enforcement
+        # ------------------------------
+        # Monthly Limit Enforcement
+        # ------------------------------
         limit_check = check_monthly_limit(
             customer_id,
             request.medicine_name,
@@ -95,6 +79,9 @@ def handle_intent(request):
                 "details": limit_check
             }
 
+        # ------------------------------
+        # Inventory Check
+        # ------------------------------
         inventory = check_inventory(request.medicine_name)
 
         if inventory.get("status") != "ok":
@@ -102,7 +89,6 @@ def handle_intent(request):
 
         if not inventory.get("available"):
 
-            # 🚨 Webhook: Out of stock
             trigger_admin_alert(
                 "out_of_stock",
                 {
@@ -112,14 +98,20 @@ def handle_intent(request):
 
             return inventory
 
+        # ------------------------------
+        # Create Order
+        # ------------------------------
         order = create_order(
             customer_id,
             request.medicine_name,
             request.quantity
         )
 
-        # 🚨 Webhook: Insufficient stock from backend
-        if order.get("status") == "rejected" and order.get("reason") == "insufficient_stock":
+        # Insufficient stock alert
+        if (
+            order.get("status") == "rejected"
+            and order.get("reason") == "insufficient_stock"
+        ):
             trigger_admin_alert(
                 "insufficient_stock_attempt",
                 {
@@ -129,11 +121,11 @@ def handle_intent(request):
                 }
             )
 
+        # Success flow
         if order.get("status") == "created":
-    
+
             save_last_medicine(customer_id, request.medicine_name)
 
-            # 🚀 Webhook: Order Created
             trigger_admin_alert(
                 "order_created",
                 {
@@ -147,7 +139,7 @@ def handle_intent(request):
                 }
             )
 
-            # 🚨 Webhook: Low stock warning
+            # Low stock warning
             if inventory.get("stock") is not None and inventory.get("stock") <= 5:
                 trigger_admin_alert(
                     "low_stock_warning",
@@ -159,11 +151,10 @@ def handle_intent(request):
 
         return order
 
-
-    # ✅ NEW BLOCK ADDED (ONLY THIS PART)
+    # ==========================================================
+    # PRESCRIPTION UPLOAD FLOW
+    # ==========================================================
     elif request.intent == "upload_prescription":
-
-        from agents.core.prescription_memory import mark_prescription_verified
 
         if not request.medicine_name:
             return {
@@ -186,22 +177,27 @@ def handle_intent(request):
             "medicine": request.medicine_name
         }
 
-
+    # ==========================================================
+    # INVENTORY
+    # ==========================================================
     elif request.intent == "inventory":
         return check_inventory(request.medicine_name)
 
-
+    # ==========================================================
+    # HISTORY
+    # ==========================================================
     elif request.intent == "history":
         return get_customer_history(customer_id)
 
-
+    # ==========================================================
+    # UPDATE STOCK
+    # ==========================================================
     elif request.intent == "update_stock":
 
         update = update_stock(request.medicine_name, request.delta)
 
         if update.get("status") == "updated":
 
-            # 🚨 Webhook: Stock manually updated
             trigger_admin_alert(
                 "stock_updated",
                 {
@@ -212,10 +208,10 @@ def handle_intent(request):
 
         return update
 
-
+    # ==========================================================
+    # SMALLTALK
+    # ==========================================================
     elif request.intent == "smalltalk":
         return {"status": "smalltalk"}
 
-
     return {"status": "error", "reason": "unknown_intent"}
- main

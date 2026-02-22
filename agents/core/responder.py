@@ -1,18 +1,20 @@
+# agents/core/responder.py
+
 import os
 from dotenv import load_dotenv
-# ✅ CHANGE: Import from langfuse.openai instead of openai
-from langfuse.openai import AzureOpenAI 
+from openai import AzureOpenAI
 
 load_dotenv()
 
-# This client now automatically sends trace data to Langfuse
 client = AzureOpenAI(
     api_key=os.getenv("AZURE_OPENAI_API_KEY"),
     api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
     azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
 )
 
+
 def generate_response(user_input, tool_result, prediction=None):
+
     try:
         # 🔥 Smalltalk shortcut
         if tool_result.get("status") == "smalltalk":
@@ -30,12 +32,12 @@ def generate_response(user_input, tool_result, prediction=None):
             )
 
         # ------------------------------
-        # Build safe backend summary
+        # Backend summary
         # ------------------------------
         backend_summary = str(tool_result)
 
         # ------------------------------
-        # Inject predictive suggestion
+        # Predictive suggestion
         # ------------------------------
         prediction_text = ""
         if prediction and prediction.get("refill_suggestion"):
@@ -46,10 +48,11 @@ You may politely suggest reordering if appropriate.
 """
 
         # ------------------------------
-        # System prompt (SAFE + CLEAR)
+        # System prompt
         # ------------------------------
         system_prompt = """
 You are a professional pharmacy assistant.
+
 Your job:
 - Respond clearly and politely.
 - Use backend data strictly.
@@ -57,18 +60,17 @@ Your job:
 - If order failed, explain clearly.
 - If success, confirm clearly.
 - If refill opportunity exists, suggest it naturally.
+
 Never mention backend systems.
 Never expose internal JSON.
 Keep responses user-friendly.
 """
 
         # ------------------------------
-        # Call Azure OpenAI (Tracked by Langfuse)
+        # Call Azure OpenAI
         # ------------------------------
         response = client.chat.completions.create(
             model=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
-            # ✅ ADDED: This name appears in your Langfuse dashboard
-            name="pharmacy-response-generation", 
             messages=[
                 {"role": "system", "content": system_prompt},
                 {
@@ -76,9 +78,12 @@ Keep responses user-friendly.
                     "content": f"""
 User Input:
 {user_input}
+
 Backend Result:
 {backend_summary}
+
 {prediction_text}
+
 Generate the final response for the user.
 """
                 }

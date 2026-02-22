@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
- main
+
 from enum import Enum
 
 
@@ -25,4 +25,4 @@ class MedicineOrder(BaseModel):
     quantity: Optional[int] = None
     stock: Optional[int] = None
     customer_id: Optional[str] = None
- main
+
