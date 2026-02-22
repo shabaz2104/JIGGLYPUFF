@@ -9,6 +9,8 @@ from agents.tools.tools import (
 from agents.core.memory import save_last_medicine, get_last_medicine
 from agents.core.prescription_rules import requires_prescription
 from agents.tools.webhook import trigger_admin_alert
+from agents.core.predictor import check_monthly_limit
+from agents.core.prescription_memory import is_prescription_verified  # ✅ ADDED
 
 
 def handle_intent(request):
@@ -23,8 +25,8 @@ def handle_intent(request):
             if last_medicine:
                 request.medicine_name = last_medicine
 
-        # 🔒 Prescription Enforcement
-        if requires_prescription(request.medicine_name):
+        # 🔒 Prescription Enforcement (UPDATED LOGIC)
+        if requires_prescription(request.medicine_name) and not is_prescription_verified(customer_id, request.medicine_name):
 
             # 🚨 Webhook: Prescription blocked
             trigger_admin_alert(
@@ -38,6 +40,31 @@ def handle_intent(request):
             return {
                 "status": "rejected",
                 "reason": "prescription_required"
+            }
+
+        # 🔒 Monthly Limit Enforcement
+        limit_check = check_monthly_limit(
+            customer_id,
+            request.medicine_name,
+            request.quantity
+        )
+
+        if not limit_check.get("allowed"):
+
+            trigger_admin_alert(
+                "monthly_limit_exceeded",
+                {
+                    "customer_id": customer_id,
+                    "medicine": request.medicine_name,
+                    "current_usage": limit_check.get("current_usage"),
+                    "max_limit": limit_check.get("max_limit")
+                }
+            )
+
+            return {
+                "status": "rejected",
+                "reason": "monthly_limit_exceeded",
+                "details": limit_check
             }
 
         inventory = check_inventory(request.medicine_name)
@@ -78,13 +105,13 @@ def handle_intent(request):
     
             save_last_medicine(customer_id, request.medicine_name)
 
-            # 🚀 Webhook: Order Created (Full Payload for Google Sheet + Email)
+            # 🚀 Webhook: Order Created
             trigger_admin_alert(
                 "order_created",
                 {
                     "order_id": order.get("order_id"),
                     "customer_id": customer_id,
-                    "customer_name": "Priyanshu",  # replace later with real DB value
+                    "customer_name": "Priyanshu",
                     "medicine": order.get("medicine"),
                     "quantity": order.get("quantity"),
                     "date": order.get("date"),
@@ -92,7 +119,7 @@ def handle_intent(request):
                 }
             )
 
-            # 🚨 Webhook: Low stock warning (after order)
+            # 🚨 Webhook: Low stock warning
             if inventory.get("stock") is not None and inventory.get("stock") <= 5:
                 trigger_admin_alert(
                     "low_stock_warning",
@@ -101,6 +128,37 @@ def handle_intent(request):
                         "remaining_stock": inventory.get("stock")
                     }
                 )
+
+        return order
+
+
+    # ✅ NEW BLOCK ADDED (ONLY THIS PART)
+    elif request.intent == "upload_prescription":
+
+        from agents.core.prescription_memory import mark_prescription_verified
+
+        if not request.medicine_name:
+            return {
+                "status": "error",
+                "reason": "medicine_required_for_prescription"
+            }
+
+        mark_prescription_verified(customer_id, request.medicine_name)
+
+        trigger_admin_alert(
+            "prescription_verified",
+            {
+                "customer_id": customer_id,
+                "medicine": request.medicine_name
+            }
+        )
+
+        return {
+            "status": "verified",
+            "medicine": request.medicine_name
+        }
+
+
     elif request.intent == "inventory":
         return check_inventory(request.medicine_name)
 

@@ -33,23 +33,31 @@ You are a pharmacy intent extraction engine.
 Return ONLY JSON in this format:
 
 {
-  "intent": "order | inventory | history | update_stock | smalltalk",
+  "intent": "order | inventory | history | update_stock | upload_prescription | smalltalk",
   "medicine_name": string or null,
   "quantity": integer or null,
   "delta": integer or null,
   "customer_id": string or null
 }
 
-If user message is casual greeting or unrelated,
-set intent to "smalltalk".
+Intent Rules:
 
-Rules:
-- order requires medicine_name + quantity
-- inventory requires medicine_name
-- history requires no medicine
-- update_stock requires medicine_name + delta
-- If not provided, use null
-Return only JSON.
+- order → requires medicine_name + quantity
+- inventory → requires medicine_name
+- history → no medicine required
+- update_stock → requires medicine_name + delta
+- upload_prescription → requires medicine_name
+- casual greetings → smalltalk
+
+Examples:
+"I want 2 Paracetamol" → order
+"Is Amoxicillin available?" → inventory
+"I uploaded prescription for Amoxicillin" → upload_prescription
+"Hi" → smalltalk
+
+If field not provided, use null.
+
+Return ONLY valid JSON.
 """
 
     response = client.chat.completions.create(
