@@ -1,4 +1,4 @@
-from agents.core.extractor import extract_structured_data
+from agents.core.extractor import extract_structured_request
 
 tests = [
     "Order 2 Paracetamol",
@@ -8,7 +8,7 @@ tests = [
 ]
 
 for t in tests:
-    result = extract_structured_data(t)
+    result = extract_structured_request(t)
     print("Input:", t)
     print("Output:", result)
     print("-" * 40)

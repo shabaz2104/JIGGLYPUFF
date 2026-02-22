@@ -1,80 +1,62 @@
+# agents/tools/tools.py
+
+import os
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_URL = "https://destiny-nonaccordant-davina.ngrok-free.dev"
 
 
-# ===============================
-# CHECK INVENTORY
-# ===============================
-def check_inventory(medicine_name: str):
+def health_check():
     try:
-        response = requests.get(
-            f"{BASE_URL}/inventory/{medicine_name}",
-            timeout=10
-        )
-        return response.json()
+        r = requests.get(f"{BASE_URL}/health")
+        return r.json()
     except Exception as e:
-        return {
-            "status": "error",
-            "reason": str(e)
-        }
+        return {"status": "error", "reason": str(e)}
 
 
-# ===============================
-# CREATE ORDER
-# ===============================
-def create_order(customer_id: str, medicine: str, quantity: int):
+def check_inventory(medicine_name):
     try:
-        response = requests.post(
+        r = requests.get(f"{BASE_URL}/inventory/{medicine_name}")
+        return r.json()
+    except Exception as e:
+        return {"status": "error", "reason": str(e)}
+
+
+def create_order(customer_id, medicine_name, quantity):
+    try:
+        r = requests.post(
             f"{BASE_URL}/create-order",
             json={
                 "customer_id": customer_id,
-                "medicine": medicine,
+                "medicine": medicine_name,
                 "quantity": quantity
-            },
-            timeout=10
+            }
         )
-        return response.json()
+        return r.json()
     except Exception as e:
-        return {
-            "status": "error",
-            "reason": str(e)
-        }
+        return {"status": "error", "reason": str(e)}
 
 
-# ===============================
-# CUSTOMER HISTORY
-# ===============================
-def get_customer_history(customer_id: str):
+def update_stock(medicine_name, delta):
     try:
-        response = requests.get(
-            f"{BASE_URL}/customer-history/{customer_id}",
-            timeout=10
-        )
-        return response.json()
-    except Exception as e:
-        return {
-            "status": "error",
-            "reason": str(e)
-        }
-
-
-# ===============================
-# UPDATE STOCK
-# ===============================
-def update_stock(medicine_name: str, stock: int):
-    try:
-        response = requests.post(
+        r = requests.post(
             f"{BASE_URL}/update-stock",
             json={
                 "medicine": medicine_name,
-                "stock": stock
-            },
-            timeout=10
+                "delta": delta
+            }
         )
-        return response.json()
+        return r.json()
     except Exception as e:
-        return {
-            "status": "error",
-            "reason": str(e)
-        }
+        return {"status": "error", "reason": str(e)}
+
+
+def get_customer_history(customer_id):
+    try:
+        r = requests.get(f"{BASE_URL}/customer-history/{customer_id}")
+        return r.json()
+    except Exception as e:
+        return {"status": "error", "reason": str(e)}
